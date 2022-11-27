@@ -9,10 +9,10 @@ thickness = 2.5  # r_in + thickness = 24 mm, max is 25 mm
 h = 12
 fillet = thickness / 3
 fillet_in = 0.3
-r_wire = 7
+r_wire = 8
 r_holes = 10
 n_holes = 6
-slit_width = 8
+slit_width = 5.5
 
 ###
 
@@ -38,8 +38,8 @@ holder_with_holes = (
 )
 
 slit = (
-    cq.Workplane("YZ").rect(slit_width / 2, 3 * h)
-    .transformed(offset=(0, 0, 2 * r_in)).rect(slit_width / 2, 3 * h)
+    cq.Workplane("YZ").rect(slit_width, 3 * h)
+    .transformed(offset=(0, 0, 2 * r_in)).rect(slit_width, 3 * h)
     .loft()
 )
 
