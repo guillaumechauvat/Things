@@ -5,9 +5,10 @@ from cadquery import exporters
 
 # parameters
 r_in = 21.5
-thickness = 2.5  # r_in + thickness = 24 mm, max is 25 mm
-h = 12
-fillet = thickness / 3
+wall_thickness = 2.5  # r_in + thickness = 24 mm, max is 25 mm
+base_thickness = 2.0
+walls_h = 4
+fillet = 0.8
 fillet_in = 0.3
 r_wire = 8
 r_holes = 10
@@ -16,43 +17,51 @@ slit_width = 5.5
 
 ###
 
-r_out = r_in + thickness
-hodler = (
-    cq.Workplane("XY").circle(r_out)
-    .transformed(offset=(0, 0, h)).circle(r_out)
+r_out = r_in + wall_thickness
+h_tot = walls_h + base_thickness
+holder = (
+    cq.Workplane("XY")
+    .circle(r_out)
+    .transformed(offset=(0, 0, walls_h + base_thickness))
+    .circle(r_out)
     .loft()
-    .faces(">Z").shell(-thickness)
-    .faces(">Z[-2]").fillet(fillet_in)
+    .faces(">Z")
+    .tag("baseplane")
+    .hole(2 * r_in, depth=walls_h , clean=True)
+    #.faces(">Z").shell(-thickness)
+    #.faces(">Z[-2]").fillet(fillet_in)
 )
 
-holder_with_main_hole = (
-    hodler.hole(r_wire)
+slit = (
+    cq.Workplane("YZ").rect(slit_width, 3 * h_tot)
+    .transformed(offset=(0, 0, 2 * r_in)).rect(slit_width, 3 * h_tot)
+    .loft()
+)
+
+holder = holder.cut(slit)
+
+holder = (
+    holder
+    .workplaneFromTagged("baseplane")
+    .hole(r_wire)
 )
 
 r_hole_centre = (r_in + r_wire / 2 + fillet - fillet_in) / 2
-holder_with_holes = (
-    holder_with_main_hole
+holder = (
+    holder
+    .workplaneFromTagged("baseplane")
     .polygon(nSides=n_holes, diameter=2*r_hole_centre, forConstruction=True)
     .vertices()
     .hole(r_holes)
 )
 
-slit = (
-    cq.Workplane("YZ").rect(slit_width, 3 * h)
-    .transformed(offset=(0, 0, 2 * r_in)).rect(slit_width, 3 * h)
-    .loft()
-)
-
-holder_with_holes = holder_with_holes.cut(slit)
-
-holder_filleted = (
-    holder_with_holes
+holder = (
+    holder
     .edges(">X").fillet(fillet)
     .faces(">Z[-2]").fillet(fillet)
     .faces(">Z").fillet(fillet)
 )
 
-#show_object(slit)
-show_object(holder_filleted)
-exporters.export(holder_filleted, 'lightbulb_holder.step')
-exporters.export(holder_filleted, 'lightbulb_holder.stl', tolerance=0.01, angularTolerance=0.07)
+show_object(holder)
+#exporters.export(holder, 'lightbulb_holder.step')
+exporters.export(holder, 'lightbulb_holder.stl', tolerance=0.01, angularTolerance=0.07)
