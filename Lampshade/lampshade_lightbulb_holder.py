@@ -4,15 +4,15 @@ from cadquery import exporters
 
 
 # parameters
-r_in = 21.5
+r_in = 22  # 43.2
 wall_thickness = 2.5  # r_in + thickness = 24 mm, max is 25 mm
 base_thickness = 2.0
 walls_h = 4
 fillet = 0.8
 fillet_in = 0.3
-r_wire = 8
-r_holes = 10
-n_holes = 6
+r_wire = 6.8  # 13.1
+r_holes = 9
+n_holes = 8
 slit_width = 5.5
 
 ###
@@ -43,10 +43,10 @@ holder = holder.cut(slit)
 holder = (
     holder
     .workplaneFromTagged("baseplane")
-    .hole(r_wire)
+    .hole(2 * r_wire)
 )
 
-r_hole_centre = (r_in + r_wire / 2 + fillet - fillet_in) / 2
+r_hole_centre = (r_in + r_wire + fillet - fillet_in) / 2
 holder = (
     holder
     .workplaneFromTagged("baseplane")
