@@ -15,12 +15,14 @@ top_thickness = 8
 walls = 1
 fillet = 1
 bottom_fillet = 0.5
+wire_width = 5
 
 # Calculated parameters
 total_length = acrylic_length + base_padding
 total_width = led_width + 2 * walls
 inner_length = total_length - 2 * walls
 inner_width = led_width
+base_extra_thickness = base_thickness - base_side_thickness
 
 # outer part
 base = (
@@ -28,11 +30,25 @@ base = (
     .tag('base')
     .rect(total_length, total_width)
     .extrude(base_side_thickness)
+)
+# fillets
+base = (
+    base
     .edges('|Z')
     .fillet(fillet)
     .faces('<Z')
     .fillet(bottom_fillet)
-    .workplaneFromTagged('base')
+)
+# inner part
+base = (
+    base
+    .faces('>Z').workplane()
+    .tag('lid')
     .rect(inner_length, inner_width)
-    .extrude(base_thickness)
+    .extrude(base_extra_thickness)
+    # extra bit for the wire hole
+    .workplaneFromTagged('lid')
+    .transformed(offset=cq.Vector(inner_length / 2, 0, 0))
+    .rect(2 * walls, wire_width)
+    .extrude(base_extra_thickness)
 )
