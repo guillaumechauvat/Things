@@ -4,8 +4,8 @@ from math import *
 
 # Dimensions
 
-acrylic_length = 198
-acrylic_width = 6
+acrylic_length = 198.1
+acrylic_width = 6.1
 led_width = 10
 led_height = 4
 base_thickness = 1.5
@@ -63,3 +63,27 @@ box = (
     .rect(total_length, total_width)
     .extrude(box_height)
 )
+# fillets
+box = (
+    box
+    .edges('|Z')
+    .fillet(fillet)
+    .faces('>Z')
+    .fillet(bottom_fillet)
+)
+# slit for acrylic sheet
+box = (
+    box
+    .faces('>Z').workplane()
+    .rect(acrylic_length, acrylic_width)
+    .cutThruAll()
+)
+inner_box = (
+    cq.Workplane('XY')
+    .rect(inner_length, inner_width)
+    .extrude(led_height + base_extra_thickness)
+)
+box = box.cut(inner_box)
+
+show_object(base)
+show_object(box)
