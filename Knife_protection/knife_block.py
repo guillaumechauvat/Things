@@ -11,10 +11,13 @@ guard_angle = 5  # in degrees
 fillet = 0.4  # this is the largest possible
 base_fillet = 0.3
 final_fillet = 0.4
+connection_fillet = 0.4
 spacing = 30
+wall_spacing = 30
 connection_width = 1.2
 connection_height = 5
 connection_height_top = 3
+wall_connection_thickness = 1
 
 # Outline of the first knife, seen from the side
 # The shape is reversed, in the direction it's intended to be printed,
@@ -205,11 +208,97 @@ beam = (
     .close()
     .loft()
 )
+###################
+# Wall Connection #
+###################
+
+wall_connection_1 = (
+    cq.Workplane("XZ")
+    .workplane(offset=blade_width)
+    .polyline([
+        (1, 0),
+        (-10, 125),
+        (-8, 125),
+        (3, 0),
+    ])
+    .close()
+    .extrude(wall_spacing)
+    .cut(
+        cq.Workplane("YZ")
+        .workplane(offset=15)
+        .polyline([
+            (-5, 5),
+            (-5, 110),
+            (-wall_spacing + 5, 5)
+        ])
+        .close()
+        .polyline([
+            (-wall_spacing, 15),
+            (-wall_spacing, 120),
+            (-10, 120)
+        ])
+        .close()
+        .extrude(-30)
+    )
+)
+
+wall_connection_2 = (
+    cq.Workplane("XZ")
+    .workplane(offset=blade_width)
+    .polyline([
+        (52, 0),
+        (42.5, 73.5),
+        (30, 125),
+        (28, 125),
+        (40.5, 73),
+        (50, 0),
+    ])
+    .close()
+    .extrude(wall_spacing)
+    .cut(
+        cq.Workplane("YZ")
+        .workplane(offset=55)
+        .polyline([
+            (-5, 15),
+            (-5, 120),
+            (-wall_spacing + 5, 120)
+        ])
+        .close()
+        .polyline([
+            (-10, 5),
+            (-wall_spacing, 5),
+            (-wall_spacing, 110)
+        ])
+        .close()
+        .extrude(-30)
+    )
+)
+
+wall_connection = (
+    cq.Workplane("XZ")
+    .workplane(offset=blade_width + wall_spacing)
+    .polyline([
+        (1, 0),
+        (52, 0),
+        (42.5, 73.5),
+        (30, 125),
+        (-10, 125),
+    ])
+    .close()
+    .extrude(wall_connection_thickness)
+    .translate((0, wall_connection_thickness, 0))
+    .union(wall_connection_1)
+    .union(wall_connection_2)
+    .fillet(connection_fillet)
+)
 
 knives = knives.fillet(fillet)
 knives = (
     knives
     .union(base_connection)
     .union(beam)
+    .union(wall_connection)
     .fillet(final_fillet)
 )
+
+show_object(knives)
