@@ -71,4 +71,4 @@ knife01 = (
 
 
 # rotate to make sure the bottom surface is aligned with the Z plane
-#knife01 = knife01.rotateAboutCenter((0,1,0), -guard_angle)
+knife01 = knife01.rotate((0, 0, 0), (0,1,0), -guard_angle)
