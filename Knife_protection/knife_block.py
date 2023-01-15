@@ -9,7 +9,11 @@ blade_width = 3
 shell_thickness = 1
 guard_angle = 5  # in degrees
 fillet = 0.4  # this is the largest possible
+base_fillet = 0.3
+final_fillet = 0.4
 spacing = 30
+connection_width = 1.2
+connection_height = 5
 
 # Outline of the first knife, seen from the side
 # The shape is reversed, in the direction it's intended to be printed,
@@ -68,7 +72,6 @@ knife01 = (
     .polyline(knife01_hole03)
     .close()
     .cutThruAll()
-    .fillet(fillet)
 )
 
 ################
@@ -118,9 +121,62 @@ knife02 = (
     .polyline(knife02_hole02)
     .close()
     .cutThruAll()
-    .fillet(fillet)
 )
 
 # rotate to make sure the bottom surface is aligned with the Z plane
 knife01 = knife01.rotate((0, 0, 0), (0,1,0), -guard_angle)
 knife02 = knife02.rotate((0, 0, 0), (0,1,0), -guard_angle)
+
+
+# space the knife holders
+knife02 = knife02.translate((0, spacing, 0))
+knives = knife01.union(knife02)
+
+# add connections
+x0 = 0
+y0 = shell_thickness / 2
+x1 = 32
+y1 = spacing - blade_width - shell_thickness / 2
+x2 = 51.5
+
+# dx offsets to get a constant width of beams
+dx1 = connection_width / atan2(y1 - y0, x1 - x0)
+dx2 = connection_width
+dx3 = connection_width / atan2(y1 - y0, x2 - x1)
+dx4 = connection_width / atan2(y1 - y0, x2 - x0)
+base_connection = (
+    cq.Workplane("XY")
+    .polyline([
+        (x0, y0),
+        (x1 - dx1, y1),
+        (x1, y1),
+        (x0 + dx1, y0),
+    ])
+    .close()
+    .polyline([
+        (x0, y0),
+        (x0, y1),
+        (x0 + dx2, y1),
+        (x0 + dx2, y0),
+    ])
+    .close()
+    .polyline([
+        (x2 - dx3, y0),
+        (x1 - dx3, y1),
+        (x1, y1),
+        (x2, y0),
+    ])
+    .close()
+    .polyline([
+        (x0, y1),
+        (x0 + dx4, y1),
+        (x2, y0),
+        (x2 - dx4, y0),
+    ])
+    .close()
+    .extrude(connection_height)
+    .fillet(base_fillet)
+)
+
+knives = knives.fillet(fillet)
+knives = knives.union(base_connection).fillet(final_fillet)
