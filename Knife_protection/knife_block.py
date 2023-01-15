@@ -235,7 +235,7 @@ wall_connection_1 = (
         .polyline([
             (-wall_spacing, 15),
             (-wall_spacing, 120),
-            (-10, 120)
+            (-15, 95)
         ])
         .close()
         .extrude(-30)
@@ -261,7 +261,7 @@ wall_connection_2 = (
         .polyline([
             (-5, 15),
             (-5, 120),
-            (-wall_spacing + 5, 120)
+            (-wall_spacing + 10, 95)
         ])
         .close()
         .polyline([
@@ -302,3 +302,4 @@ knives = (
 )
 
 show_object(knives)
+exporters.export(knives, 'knife_holder.stl', tolerance=0.01, angularTolerance=0.07)
