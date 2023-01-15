@@ -8,7 +8,8 @@ from math import *
 blade_width = 3
 shell_thickness = 1
 guard_angle = 5  # in degrees
-holes_Y_fillet = 0.4  # this is the largest possible
+fillet = 0.4  # this is the largest possible
+
 
 # Outline of the knife holes, seen from the side
 # The shape is reversed, in the direction it's intended to be printed,
@@ -21,7 +22,8 @@ knife01_outline = [
     #(25, 164),
     #(30, 162),
     (5, 150),
-    (22, 170),
+    (19, 170),
+    (24, 170),
     (40, 140),
     (50, 70),
     (53, -53 * tan(guard_angle * pi / 180)),
@@ -66,7 +68,7 @@ knife01 = (
     .polyline(knife01_hole03)
     .close()
     .cutThruAll()
-    .fillet(0.4)
+    .fillet(fillet)
 )
 
 
