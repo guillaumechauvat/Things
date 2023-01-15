@@ -9,9 +9,9 @@ blade_width = 3
 shell_thickness = 1
 guard_angle = 5  # in degrees
 fillet = 0.4  # this is the largest possible
+spacing = 30
 
-
-# Outline of the knife holes, seen from the side
+# Outline of the first knife, seen from the side
 # The shape is reversed, in the direction it's intended to be printed,
 #the tip of the knife up.
 knife01_outline = [
@@ -71,6 +71,56 @@ knife01 = (
     .fillet(fillet)
 )
 
+################
+# second knife #
+################
+
+knife02_outline = [
+    (0, 0),
+    (0, 85),
+    (5, 115),
+    (9, 120),
+    (14, 120),
+    (23, 100),
+    (29, 65),
+    (34, -34 * tan(guard_angle * pi / 180)),
+]
+
+knife02_hole01 = [
+    (5, 10),
+    (5, 85),
+    (7, 90),
+    (10, 85),
+    (22, 45),
+    (24, 10)
+]
+
+knife02_hole02 = [
+    (8, 103),
+    (10, 113),
+    (11, 113),
+    (17, 99),
+    (21, 79),
+    (19, 80),
+]
+
+knife02 = (
+    cq.Workplane("XZ")
+    #.transformed(offset=(0, spacing, 0))
+    .polyline(knife02_outline)
+    .close()
+    .extrude(blade_width)
+    .faces("<Z")
+    .shell(shell_thickness)
+    .faces("<Y")
+    .polyline(knife02_hole01)
+    .close()
+    .polyline(knife02_hole02)
+    .close()
+    .cutThruAll()
+    .fillet(fillet)
+)
 
 # rotate to make sure the bottom surface is aligned with the Z plane
 knife01 = knife01.rotate((0, 0, 0), (0,1,0), -guard_angle)
+knife02 = knife02.rotate((0, 0, 0), (0,1,0), -guard_angle)
