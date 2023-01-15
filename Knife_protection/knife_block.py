@@ -14,6 +14,7 @@ final_fillet = 0.4
 spacing = 30
 connection_width = 1.2
 connection_height = 5
+connection_height_top = 3
 
 # Outline of the first knife, seen from the side
 # The shape is reversed, in the direction it's intended to be printed,
@@ -100,8 +101,8 @@ knife02_hole01 = [
 
 knife02_hole02 = [
     (8, 103),
-    (10, 113),
-    (11, 113),
+    (10, 110),
+    (11, 110),
     (17, 99),
     (21, 79),
     (19, 80),
@@ -140,10 +141,10 @@ y1 = spacing - blade_width - shell_thickness / 2
 x2 = 51.5
 
 # dx offsets to get a constant width of beams
-dx1 = connection_width / atan2(y1 - y0, x1 - x0)
+dx1 = connection_width * sqrt(1 + (x1 - x0)**2 / (y1 - y0)**2)
 dx2 = connection_width
-dx3 = connection_width / atan2(y1 - y0, x2 - x1)
-dx4 = connection_width / atan2(y1 - y0, x2 - x0)
+dx3 = connection_width * sqrt(1 + (x2 - x1)**2 / (y1 - y0)**2)
+dx4 = connection_width * sqrt(1 + (x2 - x0)**2 / (y1 - y0)**2)
 base_connection = (
     cq.Workplane("XY")
     .polyline([
@@ -178,5 +179,37 @@ base_connection = (
     .fillet(base_fillet)
 )
 
+# extra connection between the tips
+x0 = 8
+z0 = 167
+x1 = 2
+z1 = 115
+dx = connection_width * sqrt(1 + (x1 - x0)**2 / (y1 - y0)**2)
+dz = connection_height_top * sqrt(1 + (z1 - z0)**2 / (y1 - y0)**2)
+beam = (
+    cq.Workplane("XZ")
+    .polyline([
+        (x0 - dx / 2, z0 - dz / 2),
+        (x0 - dx / 2, z0 + dz / 2),
+        (x0 + dx / 2, z0 + dz / 2),
+        (x0 + dx / 2, z0 - dz / 2),
+    ])
+    .close()
+    .workplane(offset=(y0 - y1))
+    .polyline([
+        (x1 - dx / 2, z1 - dz / 2),
+        (x1 - dx / 2, z1 + dz / 2),
+        (x1 + dx / 2, z1 + dz / 2),
+        (x1 + dx / 2, z1 - dz / 2),
+    ])
+    .close()
+    .loft()
+)
+
 knives = knives.fillet(fillet)
-knives = knives.union(base_connection).fillet(final_fillet)
+knives = (
+    knives
+    .union(base_connection)
+    .union(beam)
+    .fillet(final_fillet)
+)
